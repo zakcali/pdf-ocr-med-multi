@@ -49,7 +49,7 @@ cd pdf-ocr-med-multi
 
 ### 3. Install Dependencies
 ```bash
-uv pip install vllm openai pdf2image tqdm pillow
+uv pip install vllm openai pdf2image tqdm pillow qwen-vl-utils==0.0.14
 ```
 
 ---
