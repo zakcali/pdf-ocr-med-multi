@@ -16,15 +16,15 @@ API_BASE_URL = "http://localhost:8000/v1"
 API_KEY = "EMPTY"
 MODEL_NAME = "QuantTrio/Qwen3-VL-32B-Instruct-AWQ"
 
-# This will process 6 FILES simultaneously
-CONCURRENCY = 6
+# This will process 8 FILES simultaneously
+CONCURRENCY = 6 # 8? 
 
 # DPI for PDF rendering
 DPI = 200 
 
 # Max pixel dimension for raw images (approx A4 height at 200 DPI)
 # This prevents 4K/8K images from crashing the VLM.
-MAX_IMAGE_DIMENSION = 2240 
+MAX_IMAGE_DIMENSION = 2340 # 2240 ?
 # =================================================
 
 def encode_image(image):
@@ -47,7 +47,16 @@ def get_client():
 def ocr_single_image(client, image, page_num, doc_name):
     """Sends a single image to vLLM"""
     base64_image = encode_image(image)
-        
+
+    prompt_text = (
+        "Transcribe this medical document page into Markdown format verbatim.\n"
+        "Extract text exactly as it appears.\n"
+        "Represent tables using Markdown syntax (| Header |).\n"
+        "Maintain strict accuracy for medical dosages and numerical values.\n"
+        "Make headings bold"
+        "Do not output reasoning or conversational fillers."
+    )
+
     prompt_text_tr = (
         "Bu resimdeki Türkçe tıbbi belgeyi Markdown formatına çevir. "
         "Kurallar:\n"
