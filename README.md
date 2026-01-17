@@ -122,7 +122,7 @@ DPI = 200
 
 ## 📊 Performance Benchmarks
 
-On a **4x RTX 3090** machine with **DPI=200** and **Concurrency=8**:
+On a **4x RTX 3090** machine with **DPI=200** and **Concurrency=6**:
 
 | Metric | Performance |
 | :--- | :--- |
