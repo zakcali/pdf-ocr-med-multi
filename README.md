@@ -58,7 +58,18 @@ uv pip install vllm openai pdf2image tqdm pillow qwen-vl-utils==0.0.14
 
 This system runs in two parts: the **vLLM Inference Server** and the **Python Client Script**.
 
-### Step 1: Start the vLLM Server
+### Step 1: Prevent GPU Power spikes
+Set a hard limit on total energy. The cards will never draw more than **250 Watts**.
+Stop the cards from frantically jumping its frequency up and down, lock tem at **1500MHz*.
+
+```bash
+# Apply to ALL GPUs in one line
+sudo nvidia-smi -pl 250 -lgc 1500
+
+watch -n 0.1 nvidia-smi
+```
+
+### Step 2: Start the vLLM Server
 This command loads the **Qwen3-VL-32B (AWQ)** model across all 4 GPUs. It is tuned to prevent OOM errors while maximizing throughput.
 
 ```bash
@@ -77,7 +88,7 @@ uv run vllm serve QuantTrio/Qwen3-VL-32B-Instruct-AWQ \
 *   `--max-num-seqs 8`: Limits concurrent requests to 8. **Crucial** to prevent Out-Of-Memory errors when processing high-res images.
 *   `--enforce-eager`: Ensures compatibility with the AWQ/Marlin kernel on Ampere architecture.
 
-### Step 2: Run the OCR Client
+### Step 3: Run the OCR Client
 Open a new terminal window. Place your PDF files in the `pdf-in` folder and run the script.
 
 ```bash
