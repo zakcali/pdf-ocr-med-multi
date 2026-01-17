@@ -5,7 +5,7 @@
 ![Hardware](https://img.shields.io/badge/GPU-4x%20RTX%203090-76b900)
 ![License](https://img.shields.io/badge/License-MIT-lightgrey)
 
-**pdf-ocr-med-multi** is a production-grade, privacy-focused OCR pipeline designed to digitize medical documents (PDFs) into clean Markdown format. 
+**pdf-ocr-med-multi** is a production-grade, privacy-focused OCR pipeline designed to digitize medical documents (PDFs and pictures) into clean Markdown format. 
 
 It leverages **Qwen3-VL-32B-Instruct-AWQ** running locally on a **4x NVIDIA RTX 3090** cluster to achieve high throughput and accuracy without sending sensitive data to the cloud.
 
