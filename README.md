@@ -12,7 +12,7 @@ It leverages **Qwen3-VL-32B-Instruct-AWQ** running locally on a **4x NVIDIA RTX 
 ## 🚀 Key Features
 
 *   **100% Local & Private:** No data leaves your machine (HIPAA/KVKK compliant).
-*   **Massive Parallelism:** Processes **8 documents simultaneously** using Python multiprocessing and vLLM continuous batching.
+*   **Massive Parallelism:** Processes **6 documents simultaneously** using Python multiprocessing and vLLM continuous batching.
 *   **Smart Layout Detection:** Correctly identifies tables, headers, and key-value pairs in complex medical forms.
 *   **High Speed:** Achieves ~150 tokens/sec aggregate throughput on 4x 3090s.
 *   **Auto-Cleanup:** Automatically removes Markdown code fences for clean integration.
