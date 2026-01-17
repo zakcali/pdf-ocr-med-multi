@@ -59,9 +59,9 @@ uv pip install vllm openai pdf2image tqdm pillow qwen-vl-utils==0.0.14
 This system runs in two parts: the **vLLM Inference Server** and the **Python Client Script**.
 
 ### Step 1: Prevent GPU Power spikes
-*   Set a hard limit on total energy. 
+*   Set a hard limit on total energy and VRAM frequency to prevent System RAM OOM or Power Supply overload.
 *   The cards will never draw more than **250 Watts**.
-*   Stop the cards from frantically jumping its frequency up and down, lock tem at **1500MHz*.
+*   Stop the cards from frantically jumping their frequency up and down, lock tem at **1500MHz*.
 
 ```bash
 # Apply to ALL GPUs in one line
