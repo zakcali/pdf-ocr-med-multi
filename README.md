@@ -65,8 +65,11 @@ This system runs in two parts: the **vLLM Inference Server** and the **Python Cl
 
 ```bash
 # Apply to ALL GPUs in one line
-sudo nvidia-smi -pl 250 -lgc 1500
+# 1. Set Power Limit to 250W for ALL cards
+sudo nvidia-smi -pl 250
 
+# 2. Lock Clocks to 1500MHz for ALL cards
+sudo nvidia-smi -lgc 1500
 watch -n 0.1 nvidia-smi
 ```
 
