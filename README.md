@@ -86,7 +86,7 @@ uv run vllm serve QuantTrio/Qwen3-VL-32B-Instruct-AWQ \
 
 **Understanding the flags:**
 *   `--tensor-parallel-size 4`: Splits the model across 4 GPUs (approx. 6GB per card for model + KV cache).
-*   `--max-num-seqs 8`: Limits concurrent requests to 8. **Crucial** to prevent Out-Of-Memory errors when processing high-res images.
+*   `--max-num-seqs 6`: Limits concurrent requests to 6. **Crucial** to prevent Out-Of-Memory errors when processing high-res images.
 *   `--enforce-eager`: Ensures compatibility with the AWQ/Marlin kernel on Ampere architecture.
 
 ### Step 3: Run the OCR Client
