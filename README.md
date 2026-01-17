@@ -24,7 +24,7 @@ It leverages **Qwen3-VL-32B-Instruct-AWQ** running locally on a **4x NVIDIA RTX 
 This project is optimized for the following specific hardware configuration:
 
 *   **GPUs:** 4x NVIDIA GeForce RTX 3090 (24GB VRAM each = 96GB Total).
-*   **CPU:** Multi-core processor (support for at least 8 threads recommended).
+*   **CPU:** Multi-core processor (support for at least 6 threads recommended).
 *   **RAM:** 64GB+ System RAM.
 *   **Storage:** Fast NVMe SSD for high-speed image caching.
 
