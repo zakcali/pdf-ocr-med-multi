@@ -81,7 +81,7 @@ uv run vllm serve QuantTrio/Qwen3-VL-32B-Instruct-AWQ \
   --max-model-len 12288 \
   --enforce-eager \
   --limit-mm-per-prompt '{"video": 0}' \
-  --max-num-seqs 8
+  --max-num-seqs 6
 ```
 
 **Understanding the flags:**
@@ -110,7 +110,7 @@ INPUT_FOLDER = "pdf-in"
 OUTPUT_FOLDER = "md-out"
 
 # Concurrency must match --max-num-seqs in vLLM command
-CONCURRENCY = 8 
+CONCURRENCY = 6 
 
 # 200 DPI is the "Sweet Spot" for Qwen3-VL (Speed vs. Accuracy)
 # Increasing to 300 DPI may cause OOM errors with 8 workers.
