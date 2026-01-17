@@ -16,15 +16,15 @@ API_BASE_URL = "http://localhost:8000/v1"
 API_KEY = "EMPTY"
 MODEL_NAME = "QuantTrio/Qwen3-VL-32B-Instruct-AWQ"
 
-# This will process 8 FILES simultaneously
-CONCURRENCY = 8
+# This will process 6 FILES simultaneously
+CONCURRENCY = 6
 
 # DPI for PDF rendering
 DPI = 200 
 
 # Max pixel dimension for raw images (approx A4 height at 200 DPI)
 # This prevents 4K/8K images from crashing the VLM.
-MAX_IMAGE_DIMENSION = 2340 
+MAX_IMAGE_DIMENSION = 2240 
 # =================================================
 
 def encode_image(image):
