@@ -96,7 +96,7 @@ Open a new terminal window. Place your PDF files in the `pdf-in` folder and run 
 uv run pdf-ocr-med-multi.py
 ```
 
-*The script will automatically detect 8 CPUs and process 8 PDF files in parallel.*
+*The script will automatically detect 6 CPUs and process 6 PDF files in parallel.*
 
 ---
 
@@ -113,7 +113,7 @@ OUTPUT_FOLDER = "md-out"
 CONCURRENCY = 6 
 
 # 200 DPI is the "Sweet Spot" for Qwen3-VL (Speed vs. Accuracy)
-# Increasing to 300 DPI may cause OOM errors with 8 workers.
+# Increasing to 300 DPI may cause OOM errors with 6 workers.
 DPI = 200 
 # =================================================
 ```
