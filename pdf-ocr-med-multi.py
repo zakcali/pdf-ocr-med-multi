@@ -4,6 +4,7 @@ import io
 import time
 from multiprocessing import Pool, current_process
 from pdf2image import convert_from_path
+from PIL import Image
 from openai import OpenAI
 from tqdm import tqdm
 
@@ -15,13 +16,27 @@ API_BASE_URL = "http://localhost:8000/v1"
 API_KEY = "EMPTY"
 MODEL_NAME = "QuantTrio/Qwen3-VL-32B-Instruct-AWQ"
 
-# This will process 8 PDF FILES simultaneously
+# This will process 8 FILES simultaneously
 CONCURRENCY = 8
+
+# DPI for PDF rendering
 DPI = 200 
+
+# Max pixel dimension for raw images (approx A4 height at 200 DPI)
+# This prevents 4K/8K images from crashing the VLM.
+MAX_IMAGE_DIMENSION = 2340 
 # =================================================
 
 def encode_image(image):
+    """
+    Converts a PIL Image to base64 string.
+    Force converts to JPEG with specific quality to standardize input.
+    """
     buffered = io.BytesIO()
+    # Ensure image is in RGB mode (handle PNG/WebP transparency)
+    if image.mode in ("RGBA", "P"):
+        image = image.convert("RGB")
+        
     image.save(buffered, format="JPEG", quality=85)
     return base64.b64encode(buffered.getvalue()).decode('utf-8')
 
@@ -32,15 +47,6 @@ def get_client():
 def ocr_single_image(client, image, page_num, doc_name):
     """Sends a single image to vLLM"""
     base64_image = encode_image(image)
-
-    prompt_text = (
-        "Transcribe this medical document page into Markdown format verbatim.\n"
-        "Extract text exactly as it appears.\n"
-        "Represent tables using Markdown syntax (| Header |).\n"
-        "Maintain strict accuracy for medical dosages and numerical values.\n"
-        "Make headings bold"
-        "Do not output reasoning or conversational fillers."
-    )
         
     prompt_text_tr = (
         "Bu resimdeki Türkçe tıbbi belgeyi Markdown formatına çevir. "
@@ -81,66 +87,93 @@ def ocr_single_image(client, image, page_num, doc_name):
         print(f"[{doc_name}] Page {page_num} Error: {e}")
         return f"\n<!-- Page {page_num} Error -->\n"
 
-def process_entire_document(pdf_path):
+def process_file(file_path):
     """
-    Worker function: Handles ONE PDF file from start to finish.
+    Worker function: Handles ONE file (PDF or Image) from start to finish.
     """
     try:
-        doc_name = os.path.basename(pdf_path)
+        file_name = os.path.basename(file_path)
+        ext = os.path.splitext(file_name)[1].lower()
         
         # 1. Setup Client for this worker
         client = get_client()
 
         # 2. Output Path
-        rel_path = os.path.relpath(pdf_path, INPUT_FOLDER)
+        rel_path = os.path.relpath(file_path, INPUT_FOLDER)
         output_path = os.path.join(OUTPUT_FOLDER, os.path.splitext(rel_path)[0] + ".md")
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
-        # 3. Convert PDF to Images
-        # Note: This runs on CPU. With 8 workers, CPU usage might spike briefly.
-        images = convert_from_path(pdf_path, dpi=DPI)
-        
-        full_markdown = f"# Document: {doc_name}\n\n"
+        images = []
 
-        # 4. Process Pages sequentially *for this document*
-        # (Because we are already running 8 documents in parallel, 
-        #  we don't need to parallelize pages inside the document)
+        # 3. Load File based on type
+        if ext == '.pdf':
+            # Convert PDF to Images
+            images = convert_from_path(file_path, dpi=DPI)
+        else:
+            # Handle standard images (JPG, PNG, WEBP)
+            with Image.open(file_path) as img:
+                # Copy image to break file handle dependency
+                img = img.copy()
+                
+                # Convert to RGB to remove alpha channels (transparency)
+                if img.mode in ('RGBA', 'P'):
+                    img = img.convert('RGB')
+
+                # Resize if image is massive (prevents VLM crash)
+                if max(img.size) > MAX_IMAGE_DIMENSION:
+                    img.thumbnail((MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION), Image.Resampling.LANCZOS)
+                
+                images = [img]
+        
+        full_markdown = f"# Document: {file_name}\n\n"
+
+        # 4. Process Images
         for i, image in enumerate(images):
-            page_content = ocr_single_image(client, image, i + 1, doc_name)
+
+            # ================= TEMPORARY PATCH START =================
+            # Saves the exact image being sent to AI as a JPEG in the output folder
+            # print(f"--> STARTING: {file_name} | Page {i+1}", flush=True)
+            # debug_path = os.path.splitext(output_path)[0] + f"_page_{i+1}.jpg"
+            # image.save(debug_path, "JPEG", quality=85)
+            # ================= TEMPORARY PATCH END ===================
+
+            # Pass image to OCR (encode_image handles JPEG conversion internally)
+            page_content = ocr_single_image(client, image, i + 1, file_name)
             full_markdown += f"\n<!-- Page {i+1} -->\n{page_content}\n"
 
         # 5. Save
         with open(output_path, "w", encoding="utf-8") as f:
             f.write(full_markdown)
         
-        return f"Done: {doc_name} ({len(images)} pages)"
+        return f"Done: {file_name} ({len(images)} pages/images)"
 
     except Exception as e:
-        return f"Failed: {pdf_path} | {e}"
+        return f"Failed: {file_path} | {e}"
 
 def main():
     if not os.path.exists(INPUT_FOLDER):
         os.makedirs(INPUT_FOLDER)
 
-    pdf_files = []
+    valid_extensions = ('.pdf', '.jpg', '.jpeg', '.png', '.webp')
+    input_files = []
+    
     for root, dirs, files in os.walk(INPUT_FOLDER):
         for file in files:
-            if file.lower().endswith('.pdf'):
-                pdf_files.append(os.path.join(root, file))
+            if file.lower().endswith(valid_extensions):
+                input_files.append(os.path.join(root, file))
     
-    pdf_files.sort()
-    print(f"Found {len(pdf_files)} PDF documents.")
-    print(f"Processing 8 FILES simultaneously...")
+    input_files.sort()
+    print(f"Found {len(input_files)} documents (PDFs & Images).")
+    print(f"Processing {CONCURRENCY} FILES simultaneously...")
 
     # Use imap to get a progress bar
     with Pool(processes=CONCURRENCY) as pool:
         results = list(tqdm(
-            pool.imap_unordered(process_entire_document, pdf_files),
-            total=len(pdf_files),
+            pool.imap_unordered(process_file, input_files),
+            total=len(input_files),
             desc="Total Progress"
         ))
 
-    # Optional: Print summary
     print("\nProcessing Complete.")
 
 if __name__ == "__main__":
