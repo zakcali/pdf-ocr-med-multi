@@ -84,7 +84,7 @@ uv run vllm serve QuantTrio/Qwen3-VL-32B-Instruct-AWQ \
   --max-model-len 12288 \
   --enforce-eager \
   --limit-mm-per-prompt '{"video": 0}' \
-  --max-num-seqs 6
+  --max-num-seqs 8
 ```
 
 **Understanding the flags:**
@@ -105,14 +105,15 @@ uv run pdf-ocr-med-multi.py
 
 ## ⚙️ Configuration
 
-You can adjust the following parameters inside `pdf-ocr-med-multi.py`:
+You can adjust the following parameters inside `pdf-ocr-med-multi.py`
+You can try CONCURRENCY = 8, if you have at least 1500 watt PSU:
 
 ```python
 # ================= CONFIGURATION =================
 INPUT_FOLDER = "pdf-in"
 OUTPUT_FOLDER = "md-out"
 
-# Concurrency must match --max-num-seqs in vLLM command
+# Concurrency must match --max-num-seqs in vLLM command,
 CONCURRENCY = 6 
 
 # 200 DPI is the "Sweet Spot" for Qwen3-VL (Speed vs. Accuracy)
