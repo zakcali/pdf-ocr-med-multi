@@ -16,7 +16,7 @@ API_BASE_URL = "http://localhost:8000/v1"
 API_KEY = "EMPTY"
 MODEL_NAME = "QuantTrio/Qwen3-VL-32B-Instruct-AWQ"
 
-# This will process 8 FILES simultaneously
+# This will process 6-8 FILES simultaneously
 CONCURRENCY = 6 # 8? 
 
 # DPI for PDF rendering
